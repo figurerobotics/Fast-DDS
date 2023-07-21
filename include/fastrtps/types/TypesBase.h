@@ -19,6 +19,7 @@
 #include <bitset>
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <vector>
 #include <cctype>
 #include <algorithm>

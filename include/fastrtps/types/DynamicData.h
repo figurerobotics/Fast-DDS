@@ -142,7 +142,7 @@ protected:
             eprosima::fastcdr::Cdr& cdr) const;
 
     DynamicType_ptr type_;
-    std::map<MemberId, MemberDescriptor*> descriptors_;
+    std::unordered_map<MemberId, MemberDescriptor*> descriptors_;
 
 #ifdef DYNAMIC_TYPES_CHECKING
     int32_t int32_value_;
@@ -162,7 +162,7 @@ protected:
     std::wstring wstring_value_;
     std::map<MemberId, DynamicData*> complex_values_;
 #else
-    std::map<MemberId, void*> values_;
+    std::unordered_map<MemberId, void*> values_;
 #endif // ifdef DYNAMIC_TYPES_CHECKING
     std::vector<MemberId> loaned_values_;
     bool key_element_;
