@@ -683,8 +683,11 @@ public:
 
             try
             {
+                std::cout << "POPPING..." << std::endl;
                 while (!is_buffer_valid)
                 {
+                    std::cout << "WITHIN POP ITERATION..." << std::endl;
+
                     bool was_cell_freed;
 
                     SharedMemGlobal::PortCell* head_cell = nullptr;
@@ -692,9 +695,12 @@ public:
 
                     while ( !is_closed_.load() && nullptr == (head_cell = global_listener_->head()))
                     {
+                        std::cout << "WAIT POP..." << std::endl;
                         // Wait until there's data to pop
                         global_port_->wait_pop(*global_listener_, is_closed_, listener_index_);
                     }
+
+                    std::cout << "POPPED" << std::endl;
 
                     if (!head_cell)
                     {
@@ -703,36 +709,52 @@ public:
 
                     if (!global_port_->is_port_ok())
                     {
+                        std::cout << "PORT NOT OK" << std::endl;
                         throw std::runtime_error("");
                     }
 
                     SharedMemGlobal::BufferDescriptor buffer_descriptor = head_cell->data();
 
+                    std::cout << "BEFORE find_segment" << std::endl;
                     auto segment = shared_mem_manager_->find_segment(buffer_descriptor.source_segment_id);
+                    std::cout << "AFTER find_segment" << std::endl;
+
+                    std::cout << "BEFORE get_address_from_offset" << std::endl;
                     auto buffer_node =
                             static_cast<BufferNode*>(segment->get_address_from_offset(buffer_descriptor.
                                     buffer_node_offset));
+                    std::cout << "AFTER get_address_from_offset" << std::endl;
 
                     // TODO(Adolfo) : Dynamic allocation. Use foonathan to convert it to static allocation
+                    std::cout << "BEFORE SharedMemBuffer creation" << std::endl;
                     buffer_ref = std::make_shared<SharedMemBuffer>(segment, buffer_descriptor.source_segment_id,
                                     buffer_node,
                                     buffer_descriptor.validity_id);
+                    std::cout << "AFTER SharedMemBuffer creation" << std::endl;
 
                     // If the cell has been read by all listeners
+                    std::cout << "BEFORE pop" << std::endl;
                     global_port_->pop(*global_listener_, was_cell_freed);
+                    std::cout << "AFTER pop" << std::endl;
 
                     if (buffer_ref)
                     {
+                        std::cout << "BEFORE listener_processing_start" << std::endl;
                         global_port_->listener_processing_start(listener_index_, buffer_descriptor);
+                        std::cout << "AFTER listener_processing_start" << std::endl;
                         if (was_cell_freed)
                         {
                             // Atomically increase processing & decrease enqueued
+                            std::cout << "BEFORE dec_enqueued_inc_processing_counts" << std::endl;
                             is_buffer_valid = buffer_node->dec_enqueued_inc_processing_counts(
                                 buffer_descriptor.validity_id);
+                            std::cout << "AFTER dec_enqueued_inc_processing_counts" << std::endl;
                         }
                         else
                         {
+                            std::cout << "BEFORE inc_processing_count" << std::endl;
                             is_buffer_valid = buffer_node->inc_processing_count(buffer_descriptor.validity_id);
+                            std::cout << "AFTER inc_processing_count" << std::endl;
                         }
                     }
                     else
@@ -750,6 +772,7 @@ public:
             {
                 if (global_port_->is_port_ok())
                 {
+                    std::cout << "PORT NOT OK IN EXCEPTION" << std::endl;
                     throw;
                 }
                 else
