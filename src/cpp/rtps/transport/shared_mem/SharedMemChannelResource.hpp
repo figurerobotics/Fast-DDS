@@ -184,8 +184,9 @@ protected:
         catch (const std::exception& error)
         {
             (void)error;
-            EPROSIMA_LOG_WARNING(RTPS_MSG_OUT, "Error receiving data: " << error.what() << " - " << message_receiver()
+            EPROSIMA_LOG_WARNING(RTPS_MSG_OUT, "SHM - Error receiving data: " << error.what() << " - " << message_receiver()
                                                                         << " (" << this << ")");
+            abort();
             return nullptr;
         }
     }
