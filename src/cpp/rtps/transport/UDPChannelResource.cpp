@@ -106,6 +106,7 @@ bool UDPChannelResource::Receive(
         (void)error;
         EPROSIMA_LOG_WARNING(RTPS_MSG_OUT, "Error receiving data from UDP: " << error.what() << " - " << message_receiver()
                                                                     << " (" << this << ")");
+        abort();
         return false;
     }
 }
